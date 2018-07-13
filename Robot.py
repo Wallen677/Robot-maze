@@ -41,16 +41,10 @@ class Robot(object):
         update these parameters when necessary.
         """
         if self.testing:
-            if self.t > 20:
-            	self.epsilon = 1/self.t
-            else:
-            	self.epsilon = self.epsilon0
+            	self.epsilon = 0.0
         else:
-            if self.t > 20:
-            	self.epsilon = 1/self.t
-            else:
-            	self.epsilon = self.epsilon0
-        self.t += 1
+            	self.t += 1    
+            	self.epsilon = self.epsilon0 / self.t	  
         return self.epsilon
 
     def sense_state(self):
@@ -64,20 +58,14 @@ class Robot(object):
         """
         Create the qtable with the current state
         """
-        if state in self.Qtable.keys():
-        	pass
-        else:
-        	self.Qtable[state] = {'u':0.0, 'r':0.0, 'd':0.0, 'l':0.0}
+        self.Qtable.setdefault(state, {a: 0.0 for a in self.valid_actions})
 
     def choose_action(self):
         """
         Return an action according to given rules
         """
         def is_random_exploration():
-        	if random.uniform(0, 1) < self.epsilon:
-        		return True
-        	else:
-        		return False
+        	return random.random() < self.epsilon
 
         if self.learning:
             if is_random_exploration():
@@ -95,7 +83,7 @@ class Robot(object):
         Update the qtable according to the given rule.
         """
         if self.learning:
-        	self.Qtable[self.state][action] += self.Qtable[self.state][action] + self.alpha*(reward + self.gamma*max(self.Qtable[next_state].values()) - self.Qtable[self.state][action])
+        	self.Qtable[self.state][action] += self.alpha*(reward + self.gamma*max(self.Qtable[next_state].values()) - self.Qtable[self.state][action])
 
     def update(self):
         """
